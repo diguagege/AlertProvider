@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="subscribe.diguagege.com.subscribe">
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <provider
+            android:authorities="com.android.calendar.subscribe"
+            android:name=".base.SubscribeProviders"
+            android:multiprocess="false"
+            android:exported="true"/>
+
+        <receiver android:name=".base.SubscribeProviderBrocastReceiver">
+            <intent-filter>
+                <action android:name="com.android.calendar.subscribe.check_next_alarm" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".TestReceiver">
+            <intent-filter>
+                <action android:name="com.android.calendar.subscribe.action.SUBSCRIBE_REMINDER" />
+                <category android:name="com.android.calendar.subscribe"/>
+
+                <data android:scheme="content" />
+                <data android:host="com.android.calendar.subscribe" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".base.SubscribeProviderIntentService"/>
+    </application>
+
+</manifest>
