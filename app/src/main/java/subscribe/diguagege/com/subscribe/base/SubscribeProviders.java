@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -128,7 +129,8 @@ public class SubscribeProviders extends SQLiteContentProvider {
         mDb = mHelper.getWritableDatabase();
         switch (match) {
             case REMINDER:
-                break;
+                mAlarmManager.scheduleNextAlarm(false);
+                return 0;
             // TODO: replace the SCHEDULE_ALARM private URIs with a
             // service
             case SCHEDULE_ALARM: {
@@ -148,14 +150,18 @@ public class SubscribeProviders extends SQLiteContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case SUBJECT:
+                mDb.delete(SubscribeContract.Subject.TABLE_NAME, selection, selectionArgs);
                 break;
             case SUBSCRIBE:
                 mDb.delete(SubscribeContract.Subscribe.TABLE_NAME, selection, selectionArgs);
+                mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
                 Log.d("ProviderDebug", "DeleteReminders");
                 break;
             case REMINDER:
+                mDb.delete(SubscribeContract.Reminders.TABLE_NAME, selection, selectionArgs);
                 break;
             case SUBSCRIBE_ALERTS:
+                mDb.delete(SubscribeContract.SubscribeAlerts.TABLE_NAME, selection, selectionArgs);
                 break;
         }
 
@@ -175,6 +181,15 @@ public class SubscribeProviders extends SQLiteContentProvider {
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case SUBJECT:
+                return mDb.query(SubscribeContract.Subject.TABLE_NAME,
+                        null, selection, selectionArgs, null, null, sortOrder);
+            case SUBSCRIBE:
+                return mDb.query(SubscribeContract.Subscribe.TABLE_NAME,
+                        null, selection, selectionArgs, null, null, sortOrder);
+        }
         return null;
     }
 

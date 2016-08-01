@@ -9,6 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 
@@ -20,6 +23,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final EditText et = (EditText) findViewById(R.id.edittext);
+        Button btn = (Button) findViewById(R.id.btn);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getContentResolver().delete(SubscribeContract.Subscribe.CONTENT_URI, "_id=?", new String[]{et.getText().toString()});
+            }
+        });
 //        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 //        for (int i = 0; i < 2; i++) {
 //            ContentValues values = new ContentValues();
