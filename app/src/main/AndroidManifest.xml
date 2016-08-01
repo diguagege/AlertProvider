@@ -28,6 +28,8 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".base.SubscribeReceiver"/>
+
         <receiver android:name=".TestReceiver">
             <intent-filter>
                 <action android:name="com.android.calendar.subscribe.action.SUBSCRIBE_REMINDER" />

@@ -22,6 +22,8 @@ public class SubscribeProviders extends SQLiteContentProvider {
     protected static final int SUBSCRIBE = 2;
     protected static final int REMINDER = 3;
     protected static final int SUBSCRIBE_ALERTS = 4;
+    protected static final int SCHEDULE_ALARM = 5;
+    protected static final int SCHEDULE_ALARM_REMOVE = 6;
     private SubscribeDatabaseHelper mHelper;
     private SubscribeAlarmManager mAlarmManager;
     private Context mContext;
@@ -32,6 +34,11 @@ public class SubscribeProviders extends SQLiteContentProvider {
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe", SUBSCRIBE);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "reminders", REMINDER);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe_alerts", SUBSCRIBE_ALERTS);
+        sUriMatcher.addURI(SubscribeContract.AUTHORITY, SubscribeAlarmManager.SCHEDULE_ALARM_PATH,
+                SCHEDULE_ALARM);
+        sUriMatcher.addURI(SubscribeContract.AUTHORITY,
+                SubscribeAlarmManager.SCHEDULE_ALARM_REMOVE_PATH, SCHEDULE_ALARM_REMOVE);
+
     }
 
     @Override
@@ -117,6 +124,22 @@ public class SubscribeProviders extends SQLiteContentProvider {
 
     @Override
     protected int updateInTransaction(Uri uri, ContentValues values, String selection, String[] selectionArgs, boolean callerIsSyncAdapter) {
+        final int match = sUriMatcher.match(uri);
+        mDb = mHelper.getWritableDatabase();
+        switch (match) {
+            case REMINDER:
+                break;
+            // TODO: replace the SCHEDULE_ALARM private URIs with a
+            // service
+            case SCHEDULE_ALARM: {
+                mAlarmManager.scheduleNextAlarm(false);
+                return 0;
+            }
+            case SCHEDULE_ALARM_REMOVE: {
+                mAlarmManager.scheduleNextAlarm(true);
+                return 0;
+            }
+        }
         return 0;
     }
 
@@ -178,12 +201,12 @@ public class SubscribeProviders extends SQLiteContentProvider {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
-
+                mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
             } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
                 // Try to clean up if things were screwy due to a full disk
-
+                mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
             } else if (Intent.ACTION_TIME_CHANGED.equals(action)) {
-
+                mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
             }
         }
     };

@@ -22,7 +22,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SubscribeAlarmManager {
     protected Context mContext;
     private AlarmManager mAlarmManager;
+    static final String SCHEDULE_ALARM_PATH = "schedule_alarms";
+    static final String SCHEDULE_ALARM_REMOVE_PATH = "schedule_alarms_remove";
     private static final String SCHEDULE_NEXT_ALARM_WAKE_LOCK = "ScheduleNextAlarmWakeLock";
+
+    static final Uri SCHEDULE_ALARM_REMOVE_URI = Uri.withAppendedPath(
+            SubscribeContract.CONTENT_URI, SCHEDULE_ALARM_REMOVE_PATH);
+    static final Uri SCHEDULE_ALARM_URI = Uri.withAppendedPath(
+            SubscribeContract.CONTENT_URI, SCHEDULE_ALARM_PATH);
 
     private static final String REMOVE_SUBSCRIBE_ALARM_VALUE = "removeSubscribeAlarms";
     protected static final String ACTION_CHECK_NEXT_ALARM =
@@ -184,13 +191,21 @@ public class SubscribeAlarmManager {
                 ",r." + SubscribeContract.Reminders.MINUTES + ",s." + SubscribeContract.Subscribe.DTSTART + "-(r." + SubscribeContract.Reminders.MINUTES + "*" + DateUtils.MINUTE_IN_MILLIS + ") AS alertTime" +
                 " FROM Subscribe AS s, " +
                 "Reminders AS r " +
-                "WHERE s."+ SubscribeContract.Subscribe._ID + "=r." + SubscribeContract.Reminders.SUBSCRIBE_ID;
+                "WHERE s."+ SubscribeContract.Subscribe._ID + "=r." + SubscribeContract.Reminders.SUBSCRIBE_ID + " " +
+                "AND alertTime<=? " +
+                "AND alertTime<=? " +
+                "AND 0=(SELECT count(*) FROM " + SubscribeDatabaseHelper.Tables.ALERTS + " AS CA" + " WHERE CA."
+                + SubscribeContract.SubscribeAlerts.SUBSCRIBE_ID + "=s." + SubscribeContract.Subscribe._ID + " AND CA." + SubscribeContract.SubscribeAlerts.BEGIN + "="
+                + SubscribeContract.Subscribe.DTSTART + " AND CA." + SubscribeContract.SubscribeAlerts.ALARM_TIME + "=alertTime)"
+                + " ORDER BY alertTime," + SubscribeContract.Subscribe.DTSTART + "," + SubscribeContract.Subscribe.TITLE;
 
-        String queryParams[] = new String[]{String.valueOf(start), String.valueOf(nextAlarmTime)};
+        String queryParams[] = new String[]{String.valueOf(currentMillis - (2 * DateUtils.HOUR_IN_MILLIS))
+                                          , String.valueOf(nextAlarmTime)};
 
         Cursor cursor = null;
         try {
-            cursor = db.rawQuery(query, null);
+            cursor = db.rawQuery(query, queryParams);
+            Log.d("ProviderDebug", "Cursor count : " + cursor.getCount());
             int subscribeIdIndex = cursor.getColumnIndex(SubscribeContract.Subscribe._ID);
             int startTimeIndex = cursor.getColumnIndex(SubscribeContract.Subscribe.DTSTART);
             int endTimeIndex = cursor.getColumnIndex(SubscribeContract.Subscribe.DTEND);
@@ -246,6 +261,9 @@ public class SubscribeAlarmManager {
         // event is inserted before the next alarm check, then this method
         // will be run again when the new event is inserted.
         if (nextAlarmTime != Long.MAX_VALUE) {
+            Time t = new Time();
+            t.set(nextAlarmTime);
+            Log.d("ProviderDebug", "NextAlarmTime : " + t.format2445());
             scheduleNextAlarmCheck(nextAlarmTime + DateUtils.MINUTE_IN_MILLIS);
         } else {
             scheduleNextAlarmCheck(currentMillis + DateUtils.DAY_IN_MILLIS);
@@ -254,6 +272,24 @@ public class SubscribeAlarmManager {
     }
 
     void scheduleNextAlarmCheck(long triggerTime) {
+        Intent intent = new Intent(SubscribeReceiver.SCHEDULE);
+        intent.setClass(mContext, SubscribeReceiver.class);
+        PendingIntent pending = PendingIntent.getBroadcast(
+                mContext, 0, intent, PendingIntent.FLAG_NO_CREATE);
+        if (pending != null) {
+            // Cancel any previous alarms that do the same thing.
+            cancel(pending);
+        }
+        pending = PendingIntent.getBroadcast(
+                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Time time = new Time();
+        time.set(triggerTime);
+        String timeStr = time.format(" %a, %b %d, %Y %I:%M%P");
+        Log.d("ProviderDebug", "scheduleNextAlarmCheck at: " + triggerTime + timeStr);
+
+
+        set(AlarmManager.RTC_WAKEUP, triggerTime, pending);
     }
 
     public void scheduleAlarm(long alarmTime) {
