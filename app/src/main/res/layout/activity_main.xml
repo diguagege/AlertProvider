@@ -18,7 +18,7 @@
     <EditText
         android:id="@+id/edittext"
         android:layout_width="30dp"
-        android:layout_height="30dp" />
+        android:layout_height="60dp" />
 
     <Button
         android:id="@+id/btn"

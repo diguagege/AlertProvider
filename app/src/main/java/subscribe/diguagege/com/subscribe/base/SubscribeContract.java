@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 
@@ -105,18 +106,17 @@ public class SubscribeContract {
          * @hide
          */
         public static final long findNextAlarmTime(ContentResolver cr, long millis) {
-            String selection = ALARM_TIME + ">=" + millis;
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
-            String[] projection = new String[] { ALARM_TIME };
-            Cursor cursor = cr.query(CONTENT_URI, projection, WHERE_FINDNEXTALARMTIME,
+//            String[] projection = new String[] { ALARM_TIME };
+            Cursor cursor = cr.query(CONTENT_URI, null/*projection*/, WHERE_FINDNEXTALARMTIME,
                     (new String[] {
                             Long.toString(millis)
                     }), SORT_ORDER_ALARMTIME_ASC);
             long alarmTime = -1;
             try {
                 if (cursor != null && cursor.moveToFirst()) {
-                    alarmTime = cursor.getLong(0);
+                    alarmTime = cursor.getLong(4);
                 }
             } finally {
                 if (cursor != null) {
@@ -157,21 +157,21 @@ public class SubscribeContract {
          * provider
          *
          * @param cr the ContentResolver
-         * @param eventId the event id to match
+         * @param subscribeId the event id to match
          * @param begin the start time of the event in UTC millis
          * @param alarmTime the alarm time of the event in UTC millis
          * @return true if there is already an alarm for the given event with
          *         the same start time and alarm time.
          * @hide
          */
-        public static final boolean alarmExists(ContentResolver cr, long eventId,
+        public static final boolean alarmExists(ContentResolver cr, long subscribeId,
                                                 long begin, long alarmTime) {
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
             String[] projection = new String[] { ALARM_TIME };
             Cursor cursor = cr.query(CONTENT_URI, projection, WHERE_ALARM_EXISTS,
                     (new String[] {
-                            Long.toString(eventId), Long.toString(begin), Long.toString(alarmTime)
+                            Long.toString(subscribeId), Long.toString(begin), Long.toString(alarmTime)
                     }), null);
             boolean found = false;
             try {
@@ -184,6 +184,53 @@ public class SubscribeContract {
                 }
             }
             return found;
+        }
+
+
+        /**
+         * Searches the CalendarAlerts table for alarms that should have fired
+         * but have not and then reschedules them. This method can be called at
+         * boot time to restore alarms that may have been lost due to a phone
+         * reboot. TODO move to provider
+         *
+         * @param cr the ContentResolver
+         * @param context the Context
+         * @param manager the AlarmManager
+         * @hide
+         */
+        public static final void rescheduleMissedAlarms(ContentResolver cr,
+                                                        Context context, AlarmManager manager) {
+            // Get all the alerts that have been scheduled but have not fired
+            // and should have fired by now and are not too old.
+            long now = System.currentTimeMillis();
+            long ancient = now - DateUtils.DAY_IN_MILLIS;
+            String[] projection = new String[] {
+                    ALARM_TIME,
+            };
+
+            // TODO: construct an explicit SQL query so that we can add
+            // "GROUPBY" instead of doing a sort and de-dup
+            Cursor cursor = cr.query(SubscribeAlerts.CONTENT_URI, projection,
+                    WHERE_RESCHEDULE_MISSED_ALARMS, (new String[] {
+                            Long.toString(now), Long.toString(ancient), Long.toString(now)
+                    }), SORT_ORDER_ALARMTIME_ASC);
+            if (cursor == null) {
+                return;
+            }
+
+            try {
+                long alarmTime = -1;
+
+                while (cursor.moveToNext()) {
+                    long newAlarmTime = cursor.getLong(0);
+                    if (alarmTime != newAlarmTime) {
+                        scheduleAlarm(context, manager, newAlarmTime);
+                        alarmTime = newAlarmTime;
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
         }
     }
 

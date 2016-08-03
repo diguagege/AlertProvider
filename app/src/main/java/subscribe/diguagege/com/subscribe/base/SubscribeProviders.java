@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
@@ -189,6 +190,9 @@ public class SubscribeProviders extends SQLiteContentProvider {
             case SUBSCRIBE:
                 return mDb.query(SubscribeContract.Subscribe.TABLE_NAME,
                         null, selection, selectionArgs, null, null, sortOrder);
+            case SUBSCRIBE_ALERTS:
+                return mDb.query(SubscribeContract.SubscribeAlerts.TABLE_NAME,
+                        null, selection, selectionArgs, null, null, sortOrder);
         }
         return null;
     }
@@ -216,13 +220,43 @@ public class SubscribeProviders extends SQLiteContentProvider {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
+                updateTimezoneDependentFields();
                 mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
             } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
                 // Try to clean up if things were screwy due to a full disk
+                updateTimezoneDependentFields();
                 mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
             } else if (Intent.ACTION_TIME_CHANGED.equals(action)) {
+                updateTimezoneDependentFields();
                 mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
             }
         }
     };
+
+
+    /**
+     * This creates a background thread to check the timezone and update
+     * the timezone dependent fields in the Instances table if the timezone
+     * has changed.
+     */
+    protected void updateTimezoneDependentFields() {
+        Thread thread = new TimezoneCheckerThread();
+        thread.start();
+    }
+
+    private class TimezoneCheckerThread extends Thread {
+        @Override
+        public void run() {
+            doUpdateTimezoneDependentFields();
+        }
+    }
+
+
+    /**
+     * This method runs in a background thread.  If the timezone has changed
+     * then the Instances table will be regenerated.
+     */
+    protected void doUpdateTimezoneDependentFields() {
+        mAlarmManager.rescheduleMissedAlarms();
+    }
 }

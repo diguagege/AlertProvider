@@ -130,7 +130,11 @@ public class SubscribeAlarmManager {
     }
 
     void releaseScheduleNextAlarmWakeLock() {
+        try {
+            getScheduleNextAlarmWakeLock().release();
+        } catch (RuntimeException e) {
 
+        }
     }
 
     public void cancel(PendingIntent operation) {
@@ -297,5 +301,14 @@ public class SubscribeAlarmManager {
         alarm.set(alarmTime);
         Log.d("ProviderDebug", "scheduleAlarm : " + alarm.format2445());
         SubscribeContract.SubscribeAlerts.scheduleAlarm(mContext, mAlarmManager, alarmTime);
+    }
+
+
+    void rescheduleMissedAlarms() {
+        rescheduleMissedAlarms(mContext.getContentResolver());
+    }
+
+    public void rescheduleMissedAlarms(ContentResolver cr) {
+        SubscribeContract.SubscribeAlerts.rescheduleMissedAlarms(cr, mContext, mAlarmManager);
     }
 }

@@ -3,6 +3,7 @@ package subscribe.diguagege.com.subscribe;
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
+import android.database.Cursor;
 import android.os.RemoteException;
 import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
@@ -68,5 +69,20 @@ public class MainActivity extends AppCompatActivity {
             reminderValues.put(SubscribeContract.Reminders.SUBSCRIBE_ID, i + 1);
             getContentResolver().insert(SubscribeContract.Reminders.CONTENT_URI, reminderValues);
         }
+
+
+//        Cursor c = getContentResolver().query(SubscribeContract.Subscribe.CONTENT_URI, null, null, null, null);
+//        if (c != null) {
+//            Log.d("ProviderDebug", "Count : " + c.getCount());
+//        }
+
+//        ContentValues v = new ContentValues();
+//        v.put(SubscribeContract.SubscribeAlerts.SUBSCRIBE_ID, 1);
+//        getContentResolver().insert(SubscribeContract.SubscribeAlerts.CONTENT_URI, v);
+//
+//        Cursor c1 = getContentResolver().query(SubscribeContract.SubscribeAlerts.CONTENT_URI, null, null, null, null);
+//        if (c1 != null) {
+//            Log.d("ProviderDebug", "Count alerts : " + c1.getCount());
+//        }
     }
 }
