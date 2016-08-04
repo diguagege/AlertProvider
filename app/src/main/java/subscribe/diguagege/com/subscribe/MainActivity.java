@@ -13,26 +13,64 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import subscribe.diguagege.com.subscribe.base.SubscribeContract;
 
 public class MainActivity extends AppCompatActivity {
-
+    public static TextView tv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tv = (TextView) findViewById(R.id.text1);
         final EditText et = (EditText) findViewById(R.id.edittext);
-        Button btn = (Button) findViewById(R.id.btn);
+        final EditText titleEd = (EditText) findViewById(R.id.title);
+        final EditText startEd = (EditText) findViewById(R.id.time);
+        final EditText reminderEd = (EditText) findViewById(R.id.reminder);
+        Button btn = (Button) findViewById(R.id.delete);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getContentResolver().delete(SubscribeContract.Subscribe.CONTENT_URI, "_id=?", new String[]{et.getText().toString()});
             }
         });
-//        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+        final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+        Button btnAdd = (Button) findViewById(R.id.btn);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ops.clear();
+                ContentValues values = new ContentValues();
+                values.put(SubscribeContract.Subscribe.TITLE, titleEd.getText().toString());
+                values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
+                values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
+                int eventIdIndex = ops.size();
+                ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
+                        SubscribeContract.Subscribe.CONTENT_URI).withValues(values);
+                ops.add(b.build());
+
+                ContentValues reminderValues = new ContentValues();
+                reminderValues.put(SubscribeContract.Reminders.MINUTES, Integer.valueOf(reminderEd.getText().toString()));
+                getContentResolver().insert(SubscribeContract.Reminders.CONTENT_URI, reminderValues);
+                b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
+                b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
+                ops.add(b.build());
+
+                try {
+                    getContentResolver().applyBatch(SubscribeContract.AUTHORITY, ops);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                } catch (OperationApplicationException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
 //        for (int i = 0; i < 2; i++) {
 //            ContentValues values = new ContentValues();
 //            values.put(SubscribeContract.Subscribe.TITLE, "Hello World " + i);
@@ -58,17 +96,17 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        for (int i = 0; i < 8; i++) {
-            ContentValues values = new ContentValues();
-            values.put(SubscribeContract.Subscribe.TITLE, "Hello World " + i);
-            values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (i * DateUtils.MINUTE_IN_MILLIS));
-            values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (i * DateUtils.MINUTE_IN_MILLIS));
-            getContentResolver().insert(SubscribeContract.Subscribe.CONTENT_URI, values);
-            ContentValues reminderValues = new ContentValues();
-            reminderValues.put(SubscribeContract.Reminders.MINUTES, 1);
-            reminderValues.put(SubscribeContract.Reminders.SUBSCRIBE_ID, i + 1);
-            getContentResolver().insert(SubscribeContract.Reminders.CONTENT_URI, reminderValues);
-        }
+//        for (int i = 0; i < 8; i++) {
+//            ContentValues values = new ContentValues();
+//            values.put(SubscribeContract.Subscribe.TITLE, "Hello World " + i);
+//            values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (i * DateUtils.MINUTE_IN_MILLIS));
+//            values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (i * DateUtils.MINUTE_IN_MILLIS));
+//            getContentResolver().insert(SubscribeContract.Subscribe.CONTENT_URI, values);
+//            ContentValues reminderValues = new ContentValues();
+//            reminderValues.put(SubscribeContract.Reminders.MINUTES, 1);
+//            reminderValues.put(SubscribeContract.Reminders.SUBSCRIBE_ID, i + 1);
+//            getContentResolver().insert(SubscribeContract.Reminders.CONTENT_URI, reminderValues);
+//        }
 
 
 //        Cursor c = getContentResolver().query(SubscribeContract.Subscribe.CONTENT_URI, null, null, null, null);

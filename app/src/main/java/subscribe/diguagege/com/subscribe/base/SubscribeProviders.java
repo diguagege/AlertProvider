@@ -183,6 +183,7 @@ public class SubscribeProviders extends SQLiteContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final int match = sUriMatcher.match(uri);
+        mDb = mHelper.getWritableDatabase();
         switch (match) {
             case SUBJECT:
                 return mDb.query(SubscribeContract.Subject.TABLE_NAME,

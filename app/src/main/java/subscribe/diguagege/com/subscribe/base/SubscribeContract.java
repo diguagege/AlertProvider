@@ -168,8 +168,8 @@ public class SubscribeContract {
                                                 long begin, long alarmTime) {
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
-            String[] projection = new String[] { ALARM_TIME };
-            Cursor cursor = cr.query(CONTENT_URI, projection, WHERE_ALARM_EXISTS,
+//            String[] projection = new String[] { ALARM_TIME };
+            Cursor cursor = cr.query(CONTENT_URI, null, WHERE_ALARM_EXISTS,
                     (new String[] {
                             Long.toString(subscribeId), Long.toString(begin), Long.toString(alarmTime)
                     }), null);
@@ -204,13 +204,13 @@ public class SubscribeContract {
             // and should have fired by now and are not too old.
             long now = System.currentTimeMillis();
             long ancient = now - DateUtils.DAY_IN_MILLIS;
-            String[] projection = new String[] {
-                    ALARM_TIME,
-            };
+//            String[] projection = new String[] {
+//                    ALARM_TIME,
+//            };
 
             // TODO: construct an explicit SQL query so that we can add
             // "GROUPBY" instead of doing a sort and de-dup
-            Cursor cursor = cr.query(SubscribeAlerts.CONTENT_URI, projection,
+            Cursor cursor = cr.query(SubscribeAlerts.CONTENT_URI, null,
                     WHERE_RESCHEDULE_MISSED_ALARMS, (new String[] {
                             Long.toString(now), Long.toString(ancient), Long.toString(now)
                     }), SORT_ORDER_ALARMTIME_ASC);
@@ -222,7 +222,7 @@ public class SubscribeContract {
                 long alarmTime = -1;
 
                 while (cursor.moveToNext()) {
-                    long newAlarmTime = cursor.getLong(0);
+                    long newAlarmTime = cursor.getLong(4);
                     if (alarmTime != newAlarmTime) {
                         scheduleAlarm(context, manager, newAlarmTime);
                         alarmTime = newAlarmTime;

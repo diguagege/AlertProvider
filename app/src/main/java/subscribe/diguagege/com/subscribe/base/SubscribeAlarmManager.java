@@ -196,8 +196,8 @@ public class SubscribeAlarmManager {
                 " FROM Subscribe AS s, " +
                 "Reminders AS r " +
                 "WHERE s."+ SubscribeContract.Subscribe._ID + "=r." + SubscribeContract.Reminders.SUBSCRIBE_ID + " " +
-                "AND alertTime<=? " +
-                "AND alertTime<=? " +
+                "AND alertTime>=CAST(? AS INT) " +
+                "AND alertTime<=CAST(? AS INT) " +
                 "AND 0=(SELECT count(*) FROM " + SubscribeDatabaseHelper.Tables.ALERTS + " AS CA" + " WHERE CA."
                 + SubscribeContract.SubscribeAlerts.SUBSCRIBE_ID + "=s." + SubscribeContract.Subscribe._ID + " AND CA." + SubscribeContract.SubscribeAlerts.BEGIN + "="
                 + SubscribeContract.Subscribe.DTSTART + " AND CA." + SubscribeContract.SubscribeAlerts.ALARM_TIME + "=alertTime)"
@@ -206,8 +206,11 @@ public class SubscribeAlarmManager {
         String queryParams[] = new String[]{String.valueOf(start)
                                           , String.valueOf(nextAlarmTime)};
 
+        Log.d("ProviderDebug", "start : " + start);
+
         Cursor cursor = null;
         try {
+            // 通过Subscribe表与Reminder表连表，查出需要提醒的事件，并将记录至Subscribe_Alerts表中
             cursor = db.rawQuery(query, queryParams);
             int subscribeIdIndex = cursor.getColumnIndex(SubscribeContract.Subscribe._ID);
             int startTimeIndex = cursor.getColumnIndex(SubscribeContract.Subscribe.DTSTART);
@@ -217,7 +220,7 @@ public class SubscribeAlarmManager {
 
             while (cursor.moveToNext()) {
                 final long alarmTime = cursor.getLong(alarmTimeIndex);
-                final long eventId = cursor.getLong(subscribeIdIndex);
+                final long subscribeId = cursor.getLong(subscribeIdIndex);
                 final int minutes = cursor.getInt(minutesIndex);
                 final long startTime = cursor.getLong(startTimeIndex);
                 final long endTime = cursor.getLong(endTimeIndex);
@@ -230,14 +233,14 @@ public class SubscribeAlarmManager {
                     break;
                 }
 
-                if (SubscribeContract.SubscribeAlerts.alarmExists(resolver, eventId, startTime, alarmTime)) {
+                if (SubscribeContract.SubscribeAlerts.alarmExists(resolver, subscribeId, startTime, alarmTime)) {
                     Log.d("ProviderDebug", "alarmExists");
                     continue;
                 }
 
                 // Insert this alarm into the CalendarAlerts table
                 Uri uri = SubscribeContract.SubscribeAlerts.insert(
-                        resolver, eventId, startTime, endTime, alarmTime, minutes);
+                        resolver, subscribeId, startTime, endTime, alarmTime, minutes);
                 if (uri == null) {
                     Log.d("ProviderDebug", "uri == null");
                     continue;
@@ -256,6 +259,7 @@ public class SubscribeAlarmManager {
 
         // Refresh notification bar
         if (rowsDeleted > 0) {
+            Log.d("ProviderDebug", "Refresh notification bar");
             scheduleAlarm(currentMillis);
         }
         // If we scheduled an event alarm, then schedule the next alarm check

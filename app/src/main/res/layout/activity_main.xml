@@ -11,18 +11,44 @@
     tools:context="subscribe.diguagege.com.subscribe.MainActivity">
 
     <TextView
+        android:id="@+id/text1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!" />
 
     <EditText
         android:id="@+id/edittext"
-        android:layout_width="30dp"
+        android:hint="删除ID"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp" />
+
+    <Button
+        android:id="@+id/delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="按钮"/>
+
+    <EditText
+        android:id="@+id/title"
+        android:hint="标题"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp" />
+
+    <EditText
+        android:id="@+id/time"
+        android:hint="开始时间(当前+输入的分钟）"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp" />
+
+    <EditText
+        android:id="@+id/reminder"
+        android:hint="提前N分钟"
+        android:layout_width="wrap_content"
         android:layout_height="60dp" />
 
     <Button
         android:id="@+id/btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="按钮"/>
+        android:text="插入"/>
 </LinearLayout>
