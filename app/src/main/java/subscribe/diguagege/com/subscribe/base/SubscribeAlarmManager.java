@@ -203,13 +203,12 @@ public class SubscribeAlarmManager {
                 + SubscribeContract.Subscribe.DTSTART + " AND CA." + SubscribeContract.SubscribeAlerts.ALARM_TIME + "=alertTime)"
                 + " ORDER BY alertTime," + SubscribeContract.Subscribe.DTSTART + "," + SubscribeContract.Subscribe.TITLE;
 
-        String queryParams[] = new String[]{String.valueOf(currentMillis - (2 * DateUtils.HOUR_IN_MILLIS))
+        String queryParams[] = new String[]{String.valueOf(start)
                                           , String.valueOf(nextAlarmTime)};
 
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(query, queryParams);
-            Log.d("ProviderDebug", "Cursor count : " + cursor.getCount());
             int subscribeIdIndex = cursor.getColumnIndex(SubscribeContract.Subscribe._ID);
             int startTimeIndex = cursor.getColumnIndex(SubscribeContract.Subscribe.DTSTART);
             int endTimeIndex = cursor.getColumnIndex(SubscribeContract.Subscribe.DTEND);
