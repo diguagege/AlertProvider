@@ -34,9 +34,23 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getContentResolver().delete(SubscribeContract.Subscribe.CONTENT_URI, "_id=?", new String[]{et.getText().toString()});
+                getContentResolver().delete(SubscribeContract.Subject.CONTENT_URI, "_id=?", new String[]{et.getText().toString()});
             }
         });
+
+        ContentValues subjectValues = new ContentValues();
+        subjectValues.put(SubscribeContract.Subject.TITLE, "Hello1");
+        getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
+
+        ContentValues linkedValues = new ContentValues();
+        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 1);
+        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
+        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
+
+//        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 2);
+//        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
+//        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
+
 
         final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
         Button btnAdd = (Button) findViewById(R.id.btn);
@@ -45,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ops.clear();
                 ContentValues values = new ContentValues();
+                values.put(SubscribeContract.Subscribe.SUBJECT_COUNT, 1);
                 values.put(SubscribeContract.Subscribe.TITLE, titleEd.getText().toString());
                 values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
                 values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));

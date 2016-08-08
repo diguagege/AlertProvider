@@ -43,6 +43,13 @@ public class SubscribeContract {
                 Uri.parse("content://" + AUTHORITY + "/reminders");
     }
 
+    public static final class Linked implements BaseColumns, LinkedColumns {
+        public static final String TABLE_NAME = "Linked";
+        public static final Uri CONTENT_URI =
+                Uri.parse("content://" + AUTHORITY + "/linked");
+
+    }
+
     public static final class SubscribeAlerts implements BaseColumns, SubscribeAlertsColumns {
         public static final String TABLE_NAME = "SubscribeAlerts";
         /**
@@ -237,6 +244,7 @@ public class SubscribeContract {
 
     protected interface SubscribeColumns {
         public static final String SUBJECT_ID  = "subject_id";
+        public static final String SUBJECT_COUNT = "subject_count";
         public static final String TITLE = "title";
         public static final String ACTION = "action";
         public static final String DESCRIPTION = "description";
@@ -261,6 +269,11 @@ public class SubscribeContract {
     protected interface ReminderColumns {
         public static final String SUBSCRIBE_ID = "subscribe_id";
         public static final String MINUTES = "minutes";
+    }
+
+    protected interface LinkedColumns {
+        public static final String SUBJECT_ID = "subject_id";
+        public static final String SUBSCRIBE_ID = "subscribe_id";
     }
 
     protected interface SubscribeAlertsColumns {

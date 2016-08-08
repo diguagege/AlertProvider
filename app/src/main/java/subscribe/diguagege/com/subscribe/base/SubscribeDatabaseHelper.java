@@ -19,12 +19,14 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         public static final String SUBJECT = "Subject";
         public static final String REMINDER = "Reminders";
         public static final String ALERTS = "SubscribeAlerts";
+        public static final String LINKED = "Linked";
     }
 
     private DatabaseUtils.InsertHelper mSubjectInserter;
     private DatabaseUtils.InsertHelper mSubscribeInserter;
     private DatabaseUtils.InsertHelper mReminderInserter;
     private DatabaseUtils.InsertHelper mAlertsInserter;
+    private DatabaseUtils.InsertHelper mLinkedInserter;
 
     public long insertSubject(ContentValues values) {
         return mSubjectInserter.insert(values);
@@ -40,6 +42,10 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
 
     public long insertAlerts(ContentValues values) {
         return mAlertsInserter.insert(values);
+    }
+
+    public long insertLinked(ContentValues values) {
+        return mLinkedInserter.insert(values);
     }
 
     public SubscribeDatabaseHelper(Context context) {
@@ -64,6 +70,7 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         mSubscribeInserter = new DatabaseUtils.InsertHelper(db, Tables.SUBSCRIBE);
         mReminderInserter = new DatabaseUtils.InsertHelper(db, Tables.REMINDER);
         mAlertsInserter = new DatabaseUtils.InsertHelper(db, Tables.ALERTS);
+        mLinkedInserter = new DatabaseUtils.InsertHelper(db, Tables.LINKED);
     }
 
     @Override
@@ -76,11 +83,18 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         createSubscribesTable(db);
         createReminder(db);
         createSubscribeAlerts(db);
+        createLinked(db);
         // Trigger to remove data tied to an event when we delete that event.
         db.execSQL("CREATE TRIGGER subject_cleanup_delete DELETE ON " + Tables.SUBJECT + " " +
                 "BEGIN " +
                 SUBJECT_CLEANUP_TRIGGER_SQL +
                 "END");
+
+        db.execSQL("CREATE TRIGGER linked_cleanup_delete DELETE ON " + Tables.LINKED + " " +
+                "BEGIN " +
+                LINKED_CLEANUP_TRIGGER_SQL +
+                "END");
+
         db.execSQL("CREATE TRIGGER subjects_cleanup_delete DELETE ON " + Tables.SUBSCRIBE + " " +
                 "BEGIN " +
                 SUBSCRIBE_CLEANUP_TRIGGER_SQL +
@@ -98,9 +112,24 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
                     "old." + SubscribeContract.Subscribe._ID + ";";
 
     private static final String SUBJECT_CLEANUP_TRIGGER_SQL =
-            "DELETE FROM " + Tables.SUBSCRIBE +
-                    " WHERE " + SubscribeContract.Subscribe.SUBJECT_ID + "=" +
+            "DELETE FROM " + Tables.LINKED +
+                    " WHERE " + SubscribeContract.Linked.SUBJECT_ID + "=" +
                     "old." + SubscribeContract.Subject._ID + ";";
+
+    private static final String LINKED_CLEANUP_TRIGGER_SQL =
+            "DELETE FROM " + Tables.SUBSCRIBE +
+                    " WHERE 1=(SELECT " + SubscribeContract.Subscribe.SUBJECT_COUNT +
+                    " FROM " + Tables.SUBSCRIBE +
+                    " WHERE " + SubscribeContract.Subscribe._ID + "=" +
+                    "old." + SubscribeContract.Linked.SUBSCRIBE_ID + " );" +
+            "UPDATE " + Tables.SUBSCRIBE + " SET " +
+                    SubscribeContract.Subscribe.SUBJECT_COUNT + "=(SELECT " + SubscribeContract.Subscribe.SUBJECT_COUNT +
+                    " FROM " + Tables.SUBSCRIBE +
+                    " WHERE " + SubscribeContract.Subscribe._ID + "=" +
+                    "old." + SubscribeContract.Linked.SUBSCRIBE_ID
+                    + " )-1" +
+                    " WHERE " + SubscribeContract.Subscribe._ID + "=" +
+                    "old." + SubscribeContract.Linked.SUBSCRIBE_ID + ";";
 
 
 
@@ -108,6 +137,7 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + Tables.SUBSCRIBE + " (" +
                 SubscribeContract.Subscribe._ID + " INTEGER PRIMARY KEY," +
                 SubscribeContract.Subscribe.SUBJECT_ID  + " INTEGER," +
+                SubscribeContract.Subscribe.SUBJECT_COUNT + " INTEGER," +
                 SubscribeContract.Subscribe.TITLE + " TEXT," +
                 SubscribeContract.Subscribe.ACTION + " TEXT," +
                 SubscribeContract.Subscribe.DESCRIPTION + " TEXT," +
@@ -154,6 +184,14 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
                 SubscribeContract.SubscribeAlerts.STATE + " INTEGER," +
                 SubscribeContract.SubscribeAlerts.MINUTES + " INTEGER"
                 + " )");
+    }
+
+    private void createLinked(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + Tables.LINKED + " (" +
+                SubscribeContract.Linked._ID + " INTEGER PRIMARY KEY," +
+                SubscribeContract.Linked.SUBJECT_ID + " INTEGER," +
+                SubscribeContract.Linked.SUBSCRIBE_ID + " INTEGER" +
+                " )");
     }
 
 }

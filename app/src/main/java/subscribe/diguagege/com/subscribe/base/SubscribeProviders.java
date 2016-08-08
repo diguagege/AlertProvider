@@ -26,6 +26,7 @@ public class SubscribeProviders extends SQLiteContentProvider {
     protected static final int SUBSCRIBE_ALERTS = 4;
     protected static final int SCHEDULE_ALARM = 5;
     protected static final int SCHEDULE_ALARM_REMOVE = 6;
+    protected static final int LINKED = 7;
     private SubscribeDatabaseHelper mHelper;
     private SubscribeAlarmManager mAlarmManager;
     private Context mContext;
@@ -36,6 +37,7 @@ public class SubscribeProviders extends SQLiteContentProvider {
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe", SUBSCRIBE);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "reminders", REMINDER);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe_alerts", SUBSCRIBE_ALERTS);
+        sUriMatcher.addURI(SubscribeContract.AUTHORITY, "linked", LINKED );
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, SubscribeAlarmManager.SCHEDULE_ALARM_PATH,
                 SCHEDULE_ALARM);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY,
@@ -115,6 +117,9 @@ public class SubscribeProviders extends SQLiteContentProvider {
             case SUBSCRIBE_ALERTS:
                 id = mHelper.insertAlerts(values);
                 break;
+            case LINKED:
+                id = mHelper.insertLinked(values);
+                break;
         }
 
         if (id < 0) {
@@ -163,6 +168,9 @@ public class SubscribeProviders extends SQLiteContentProvider {
                 break;
             case SUBSCRIBE_ALERTS:
                 mDb.delete(SubscribeContract.SubscribeAlerts.TABLE_NAME, selection, selectionArgs);
+                break;
+            case LINKED:
+                mDb.delete(SubscribeContract.Linked.TABLE_NAME, selection, selectionArgs);
                 break;
         }
 
