@@ -12,7 +12,10 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 /**
@@ -27,14 +30,31 @@ public class SubscribeProviders extends SQLiteContentProvider {
     protected static final int SCHEDULE_ALARM = 5;
     protected static final int SCHEDULE_ALARM_REMOVE = 6;
     protected static final int LINKED = 7;
+    protected static final int SUBSCRIBE_ID = 8;
     private SubscribeDatabaseHelper mHelper;
     private SubscribeAlarmManager mAlarmManager;
     private Context mContext;
     private static SubscribeProviders mInstance;
+    private Handler mBroadcastHandler;
+
+    /**
+     * Arbitrary integer that we assign to the messages that we send to this
+     * thread's handler, indicating that these are requests to send an update
+     * notification intent.
+     */
+    private static final int UPDATE_BROADCAST_MSG = 1;
+
+    /**
+     * Any requests to send a PROVIDER_CHANGED intent will be collapsed over
+     * this window, to prevent spamming too many intents at once.
+     */
+    private static final long UPDATE_BROADCAST_TIMEOUT_MILLIS =
+            DateUtils.SECOND_IN_MILLIS;
 
     static {
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subject", SUBJECT);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe", SUBSCRIBE);
+        sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe/*", SUBSCRIBE_ID);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "reminders", REMINDER);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe_alerts", SUBSCRIBE_ALERTS);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "linked", LINKED );
@@ -58,6 +78,26 @@ public class SubscribeProviders extends SQLiteContentProvider {
     private boolean initialize() {
         mInstance = this;
         mContext = getContext();
+
+        // Fix bug #312008
+        mBroadcastHandler = new Handler(mContext.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                Context context = SubscribeProviders.this.mContext;
+                if (msg.what == UPDATE_BROADCAST_MSG) {
+                    // Broadcast a provider changed intent
+                    doSendUpdateNotification();
+                    // Because the handler does not guarantee message delivery in
+                    // the case that the provider is killed, we need to make sure
+                    // that the provider stays alive long enough to deliver the
+                    // notification. This empty service is sufficient to "wedge" the
+                    // process until we stop it here.
+                    context.stopService(new Intent(context, EmptyService.class));
+                }
+            }
+        };
+
+
         mHelper = (SubscribeDatabaseHelper)getDatabaseHelper();
         // Register for Intent broadcasts
         IntentFilter filter = new IntentFilter();
@@ -108,6 +148,13 @@ public class SubscribeProviders extends SQLiteContentProvider {
                 break;
             case SUBSCRIBE:
                 id = mHelper.insertSubscribe(values);
+                sendUpdateNotification(id);
+                break;
+            case SUBSCRIBE_ID:
+                id = mHelper.insertSubscribe(values);
+                long subjectId = ContentUris.parseId(uri);
+                mHelper.insertLinked(subjectId, id);
+                sendUpdateNotification(id);
                 break;
             case REMINDER:
                 id = mHelper.insertReminders(values);
@@ -134,6 +181,12 @@ public class SubscribeProviders extends SQLiteContentProvider {
         final int match = sUriMatcher.match(uri);
         mDb = mHelper.getWritableDatabase();
         switch (match) {
+            case SUBSCRIBE:
+                mDb.update(SubscribeDatabaseHelper.Tables.SUBSCRIBE, values, selection, selectionArgs);
+                return 0;
+            case SUBSCRIBE_ID:
+                mDb.update(SubscribeDatabaseHelper.Tables.SUBSCRIBE, values, selection, selectionArgs);
+                return 0;
             case REMINDER:
                 mAlarmManager.scheduleNextAlarm(false);
                 return 0;
@@ -244,6 +297,14 @@ public class SubscribeProviders extends SQLiteContentProvider {
 
 
     /**
+     * This method use to
+     */
+    private void checkUpdateSubscribe() {
+
+    }
+
+
+    /**
      * This creates a background thread to check the timezone and update
      * the timezone dependent fields in the Instances table if the timezone
      * has changed.
@@ -267,5 +328,68 @@ public class SubscribeProviders extends SQLiteContentProvider {
      */
     protected void doUpdateTimezoneDependentFields() {
         mAlarmManager.rescheduleMissedAlarms();
+    }
+
+
+    /**
+     * This method should not ever be called directly, to prevent sending too
+     * many potentially expensive broadcasts.  Instead, call
+     * {@link #sendUpdateNotification()} instead.
+     *
+     * @see #sendUpdateNotification()
+     */
+    private void doSendUpdateNotification() {
+        Intent intent = new Intent(Intent.ACTION_PROVIDER_CHANGED,
+                SubscribeContract.CONTENT_URI);
+        mContext.sendBroadcast(intent, null);
+    }
+
+
+    /**
+     * Call this to trigger a broadcast of the ACTION_PROVIDER_CHANGED intent.
+     * This also provides a timeout, so any calls to this method will be batched
+     * over a period of BROADCAST_TIMEOUT_MILLIS defined in this class.
+     *
+     */
+    private void sendUpdateNotification() {
+        // We use -1 to represent an update to all events
+        sendUpdateNotification(-1);
+    }
+
+
+    /**
+     * Call this to trigger a broadcast of the ACTION_PROVIDER_CHANGED intent.
+     * This also provides a timeout, so any calls to this method will be batched
+     * over a period of BROADCAST_TIMEOUT_MILLIS defined in this class.  The
+     * actual sending of the intent is done in
+     * {@link #doSendUpdateNotification()}.
+     *
+     * TODO add support for eventId
+     *
+     * @param eventId the ID of the event that changed, or -1 for no specific event
+     */
+    private void sendUpdateNotification(long eventId) {
+        // Are there any pending broadcast requests?
+        if (mBroadcastHandler.hasMessages(UPDATE_BROADCAST_MSG)) {
+            // Delete any pending requests, before requeuing a fresh one
+            mBroadcastHandler.removeMessages(UPDATE_BROADCAST_MSG);
+        } else {
+            // Because the handler does not guarantee message delivery in
+            // the case that the provider is killed, we need to make sure
+            // that the provider stays alive long enough to deliver the
+            // notification. This empty service is sufficient to "wedge" the
+            // process until we stop it here.
+            mContext.startService(new Intent(mContext, EmptyService.class));
+        }
+        // We use a much longer delay for sync-related updates, to prevent any
+        // receivers from slowing down the sync
+        long delay = UPDATE_BROADCAST_TIMEOUT_MILLIS;
+        // Despite the fact that we actually only ever use one message at a time
+        // for now, it is really important to call obtainMessage() to get a
+        // clean instance.  This avoids potentially infinite loops resulting
+        // adding the same instance to the message queue twice, since the
+        // message queue implements its linked list using a field from Message.
+        Message msg = mBroadcastHandler.obtainMessage(UPDATE_BROADCAST_MSG);
+        mBroadcastHandler.sendMessageDelayed(msg, delay);
     }
 }

@@ -1,15 +1,13 @@
 package subscribe.diguagege.com.subscribe;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
-import android.database.Cursor;
 import android.os.RemoteException;
-import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,10 +40,10 @@ public class MainActivity extends AppCompatActivity {
         subjectValues.put(SubscribeContract.Subject.TITLE, "Hello1");
         getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
 
-        ContentValues linkedValues = new ContentValues();
-        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 1);
-        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
-        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
+//        ContentValues linkedValues = new ContentValues();
+//        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 1);
+//        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
+//        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
 
 //        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 2);
 //        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
@@ -65,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
                 int eventIdIndex = ops.size();
                 ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
-                        SubscribeContract.Subscribe.CONTENT_URI).withValues(values);
+                        ContentUris.withAppendedId(SubscribeContract.Subscribe.CONTENT_URI, 1)).withValues(values);
                 ops.add(b.build());
 
                 ContentValues reminderValues = new ContentValues();

@@ -17,6 +17,10 @@ import subscribe.diguagege.com.subscribe.base.SubscribeContract;
 public class TestReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().equals(Intent.ACTION_PROVIDER_CHANGED)) {
+            Toast.makeText(context, "provider changed", Toast.LENGTH_LONG).show();
+            return;
+        }
         Time t = new Time();
         t.set(System.currentTimeMillis());
         Log.d("ProviderDebug", t.format2445());

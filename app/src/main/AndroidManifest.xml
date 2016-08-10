@@ -32,6 +32,7 @@
 
         <receiver android:name=".TestReceiver">
             <intent-filter>
+                <action android:name="android.intent.action.PROVIDER_CHANGED" />
                 <action android:name="com.android.calendar.subscribe.action.SUBSCRIBE_REMINDER" />
                 <category android:name="com.android.calendar.subscribe"/>
 
@@ -41,6 +42,7 @@
         </receiver>
 
         <service android:name=".base.SubscribeProviderIntentService"/>
+        <service android:name=".base.EmptyService"/>
     </application>
 
 </manifest>

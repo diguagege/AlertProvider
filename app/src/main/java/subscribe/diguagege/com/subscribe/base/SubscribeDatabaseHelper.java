@@ -48,6 +48,13 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         return mLinkedInserter.insert(values);
     }
 
+    public long insertLinked(long subjectId, long subscribeId) {
+        ContentValues values = new ContentValues();
+        values.put(SubscribeContract.Linked.SUBJECT_ID, subjectId);
+        values.put(SubscribeContract.Linked.SUBSCRIBE_ID, subscribeId);
+        return mLinkedInserter.insert(values);
+    }
+
     public SubscribeDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -136,7 +143,6 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
     private void createSubscribesTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.SUBSCRIBE + " (" +
                 SubscribeContract.Subscribe._ID + " INTEGER PRIMARY KEY," +
-                SubscribeContract.Subscribe.SUBJECT_ID  + " INTEGER," +
                 SubscribeContract.Subscribe.SUBJECT_COUNT + " INTEGER," +
                 SubscribeContract.Subscribe.TITLE + " TEXT," +
                 SubscribeContract.Subscribe.ACTION + " TEXT," +
@@ -148,7 +154,12 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
                 SubscribeContract.Subscribe.EXTEND_DATA1 + " TEXT," +
                 SubscribeContract.Subscribe.EXTEND_DATA2 + " TEXT," +
                 SubscribeContract.Subscribe.EXTEND_DATA3 + " TEXT," +
-                SubscribeContract.Subscribe.EXTEND_DATA4 + " TEXT"
+                SubscribeContract.Subscribe.EXTEND_DATA4 + " TEXT," +
+                SubscribeContract.Subscribe.EXTEND_DATA5 + " TEXT," +
+                SubscribeContract.Subscribe.EXTEND_DATA6 + " TEXT," +
+                SubscribeContract.Subscribe.EXTEND_DATA7 + " TEXT," +
+                SubscribeContract.Subscribe.EXTEND_DATA8 + " TEXT," +
+                SubscribeContract.Subscribe.EXTEND_DATA9 + " TEXT"
                 + " )");
     }
 

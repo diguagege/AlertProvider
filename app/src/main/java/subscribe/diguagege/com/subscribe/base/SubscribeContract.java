@@ -243,7 +243,6 @@ public class SubscribeContract {
 
 
     protected interface SubscribeColumns {
-        public static final String SUBJECT_ID  = "subject_id";
         public static final String SUBJECT_COUNT = "subject_count";
         public static final String TITLE = "title";
         public static final String ACTION = "action";
@@ -256,6 +255,11 @@ public class SubscribeContract {
         public static final String EXTEND_DATA2 = "extend_data2";
         public static final String EXTEND_DATA3 = "extend_data3";
         public static final String EXTEND_DATA4 = "extend_data4";
+        public static final String EXTEND_DATA5 = "extend_data5";
+        public static final String EXTEND_DATA6 = "extend_data6";
+        public static final String EXTEND_DATA7 = "extend_data7";
+        public static final String EXTEND_DATA8 = "extend_data8";
+        public static final String EXTEND_DATA9 = "extend_data9";
     }
 
     protected interface SubjectColumns {
