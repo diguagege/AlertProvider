@@ -95,7 +95,7 @@ public class SubscribeAlarmManager {
     }
 
     void trrigerDeleteLink(int subjectId) {
-        String selection = SubscribeContract.Subject._ID + "=?";
+        String selection = SubscribeContract.Linked.SUBJECT_ID + "=?";
         String[] selectionArgs = new String[]{String.valueOf(subjectId)};
         final ContentResolver resolver = mContext.getContentResolver();
         SubscribeContract.Linked.delete(resolver, selection, selectionArgs);
