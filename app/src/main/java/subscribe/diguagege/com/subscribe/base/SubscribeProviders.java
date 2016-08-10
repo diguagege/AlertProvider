@@ -213,10 +213,13 @@ public class SubscribeProviders extends SQLiteContentProvider {
                 mAlarmManager.trrigerDeleteLink(subjectId);
                 break;
             case SUBSCRIBE:
-                int id = mDb.delete(SubscribeContract.Subscribe.TABLE_NAME, selection, selectionArgs);
-                sendUpdateNotification(id);
-                mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
-                Log.d("ProviderDebug", "DeleteReminders");
+                int deleteCount = mDb.delete(SubscribeContract.Subscribe.TABLE_NAME, selection, selectionArgs);
+                Log.d("ProviderDebug", "DeleteCount : " + deleteCount);
+                if (deleteCount > 0) {
+                    sendUpdateNotification(deleteCount);
+                    mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
+                    Log.d("ProviderDebug", "DeleteReminders");
+                }
                 break;
             case REMINDER:
                 mDb.delete(SubscribeContract.Reminders.TABLE_NAME, selection, selectionArgs);

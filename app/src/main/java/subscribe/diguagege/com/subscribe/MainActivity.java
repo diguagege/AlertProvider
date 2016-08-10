@@ -40,14 +40,14 @@ public class MainActivity extends AppCompatActivity {
         subjectValues.put(SubscribeContract.Subject.TITLE, "Hello1");
         getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
 
-//        ContentValues linkedValues = new ContentValues();
+        ContentValues linkedValues = new ContentValues();
 //        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 1);
 //        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
 //        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
 
-//        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 2);
-//        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
-//        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
+        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 2);
+        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
+        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
 
 
         final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
