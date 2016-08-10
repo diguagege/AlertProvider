@@ -48,6 +48,10 @@ public class SubscribeContract {
         public static final Uri CONTENT_URI =
                 Uri.parse("content://" + AUTHORITY + "/linked");
 
+        public static final int delete(ContentResolver cr, String where, String[] selectionArgs) {
+            return cr.delete(CONTENT_URI, where, selectionArgs);
+        }
+
     }
 
     public static final class SubscribeAlerts implements BaseColumns, SubscribeAlertsColumns {
@@ -243,7 +247,7 @@ public class SubscribeContract {
 
 
     protected interface SubscribeColumns {
-        public static final String SUBJECT_COUNT = "subject_count";
+        public static final String EVENT_ID = "event_id";
         public static final String TITLE = "title";
         public static final String ACTION = "action";
         public static final String DESCRIPTION = "description";

@@ -2,18 +2,23 @@ package subscribe.diguagege.com.subscribe.base;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.PowerManager;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -87,6 +92,42 @@ public class SubscribeAlarmManager {
         mContext = context;
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mNextAlarmCheckScheduled = new AtomicBoolean(false);
+    }
+
+    void trrigerDeleteLink(int subjectId) {
+        String selection = SubscribeContract.Subject._ID + "=?";
+        String[] selectionArgs = new String[]{String.valueOf(subjectId)};
+        final ContentResolver resolver = mContext.getContentResolver();
+        SubscribeContract.Linked.delete(resolver, selection, selectionArgs);
+    }
+
+    void trrigerDeleteSubscribe(Cursor cursor) {
+        if (cursor == null) {
+            return;
+        }
+        try {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final ArrayList<ContentProviderOperation> ops
+                    = new ArrayList<ContentProviderOperation>();
+            while (cursor != null && cursor.moveToNext()) {
+                long id = cursor.getLong(2);
+                ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(SubscribeContract.Subscribe.CONTENT_URI);
+                String selection = "_id=? AND 0=(SELECT count(*) FROM " + SubscribeDatabaseHelper.Tables.LINKED + " WHERE " + SubscribeContract.Linked.SUBSCRIBE_ID +"=?)";
+                String[] selectionArgs = new String[]{String.valueOf(id), String.valueOf(id)};
+                builder.withSelection(selection, selectionArgs);
+                ops.add(builder.build());
+            }
+
+            resolver.applyBatch(SubscribeContract.AUTHORITY, ops);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (OperationApplicationException e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
     }
 
     void scheduleNextAlarm(boolean removeAlarms) {

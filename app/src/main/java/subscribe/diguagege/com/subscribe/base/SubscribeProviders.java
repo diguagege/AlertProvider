@@ -209,10 +209,12 @@ public class SubscribeProviders extends SQLiteContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case SUBJECT:
-                mDb.delete(SubscribeContract.Subject.TABLE_NAME, selection, selectionArgs);
+                int subjectId = mDb.delete(SubscribeContract.Subject.TABLE_NAME, selection, selectionArgs);
+                mAlarmManager.trrigerDeleteLink(subjectId);
                 break;
             case SUBSCRIBE:
-                mDb.delete(SubscribeContract.Subscribe.TABLE_NAME, selection, selectionArgs);
+                int id = mDb.delete(SubscribeContract.Subscribe.TABLE_NAME, selection, selectionArgs);
+                sendUpdateNotification(id);
                 mAlarmManager.scheduleNextAlarm(false /* do not remove alarms */);
                 Log.d("ProviderDebug", "DeleteReminders");
                 break;
@@ -223,7 +225,12 @@ public class SubscribeProviders extends SQLiteContentProvider {
                 mDb.delete(SubscribeContract.SubscribeAlerts.TABLE_NAME, selection, selectionArgs);
                 break;
             case LINKED:
+                final Cursor cursor = mDb.query(SubscribeContract.Linked.TABLE_NAME, null, selection, selectionArgs, null, null, null);
+                if (cursor != null) {
+                    Log.d("ProviderDebug", "Count : " + cursor.getCount());
+                }
                 mDb.delete(SubscribeContract.Linked.TABLE_NAME, selection, selectionArgs);
+                mAlarmManager.trrigerDeleteSubscribe(cursor);
                 break;
         }
 

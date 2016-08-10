@@ -92,15 +92,15 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         createSubscribeAlerts(db);
         createLinked(db);
         // Trigger to remove data tied to an event when we delete that event.
-        db.execSQL("CREATE TRIGGER subject_cleanup_delete DELETE ON " + Tables.SUBJECT + " " +
-                "BEGIN " +
-                SUBJECT_CLEANUP_TRIGGER_SQL +
-                "END");
-
-        db.execSQL("CREATE TRIGGER linked_cleanup_delete DELETE ON " + Tables.LINKED + " " +
-                "BEGIN " +
-                LINKED_CLEANUP_TRIGGER_SQL +
-                "END");
+//        db.execSQL("CREATE TRIGGER subject_cleanup_delete DELETE ON " + Tables.SUBJECT + " " +
+//                "BEGIN " +
+//                SUBJECT_CLEANUP_TRIGGER_SQL +
+//                "END");
+//
+//        db.execSQL("CREATE TRIGGER linked_cleanup_delete DELETE ON " + Tables.LINKED + " " +
+//                "BEGIN " +
+//                LINKED_CLEANUP_TRIGGER_SQL +
+//                "END");
 
         db.execSQL("CREATE TRIGGER subjects_cleanup_delete DELETE ON " + Tables.SUBSCRIBE + " " +
                 "BEGIN " +
@@ -125,25 +125,19 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String LINKED_CLEANUP_TRIGGER_SQL =
             "DELETE FROM " + Tables.SUBSCRIBE +
-                    " WHERE 1=(SELECT " + SubscribeContract.Subscribe.SUBJECT_COUNT +
-                    " FROM " + Tables.SUBSCRIBE +
                     " WHERE " + SubscribeContract.Subscribe._ID + "=" +
-                    "old." + SubscribeContract.Linked.SUBSCRIBE_ID + " );" +
-            "UPDATE " + Tables.SUBSCRIBE + " SET " +
-                    SubscribeContract.Subscribe.SUBJECT_COUNT + "=(SELECT " + SubscribeContract.Subscribe.SUBJECT_COUNT +
-                    " FROM " + Tables.SUBSCRIBE +
-                    " WHERE " + SubscribeContract.Subscribe._ID + "=" +
-                    "old." + SubscribeContract.Linked.SUBSCRIBE_ID
-                    + " )-1" +
-                    " WHERE " + SubscribeContract.Subscribe._ID + "=" +
-                    "old." + SubscribeContract.Linked.SUBSCRIBE_ID + ";";
+                    " old." + SubscribeContract.Linked.SUBSCRIBE_ID  +
+                    " AND 0=(SELECT count(*)" +
+                    " FROM " + Tables.LINKED + " AS link" +
+                    " WHERE link." + SubscribeContract.Linked.SUBSCRIBE_ID + "=" +
+                    " old." + SubscribeContract.Linked.SUBSCRIBE_ID + " );";
 
 
 
     private void createSubscribesTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.SUBSCRIBE + " (" +
                 SubscribeContract.Subscribe._ID + " INTEGER PRIMARY KEY," +
-                SubscribeContract.Subscribe.SUBJECT_COUNT + " INTEGER," +
+                SubscribeContract.Subscribe.EVENT_ID + " INTEGER," +
                 SubscribeContract.Subscribe.TITLE + " TEXT," +
                 SubscribeContract.Subscribe.ACTION + " TEXT," +
                 SubscribeContract.Subscribe.DESCRIPTION + " TEXT," +

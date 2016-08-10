@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 ops.clear();
                 ContentValues values = new ContentValues();
-                values.put(SubscribeContract.Subscribe.SUBJECT_COUNT, 1);
+                values.put(SubscribeContract.Subscribe.EVENT_ID, 1);
                 values.put(SubscribeContract.Subscribe.TITLE, titleEd.getText().toString());
                 values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
                 values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
