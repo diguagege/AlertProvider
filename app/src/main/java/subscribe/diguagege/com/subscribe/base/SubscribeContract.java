@@ -268,6 +268,7 @@ public class SubscribeContract {
 
     protected interface SubjectColumns {
         public static final String TITLE = "title";
+        public static final String SUBJECT_ID = "subject_id";
         public static final String ACTION = "action";
         public static final String DESCRIPTION = "description";
         public static final String ICON_URL = "icon";

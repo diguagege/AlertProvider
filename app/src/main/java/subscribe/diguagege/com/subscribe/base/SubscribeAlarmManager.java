@@ -94,7 +94,7 @@ public class SubscribeAlarmManager {
         mNextAlarmCheckScheduled = new AtomicBoolean(false);
     }
 
-    void trrigerDeleteLink(int subjectId) {
+    void trrigerDeleteLink(long subjectId) {
         String selection = SubscribeContract.Linked.SUBJECT_ID + "=?";
         String[] selectionArgs = new String[]{String.valueOf(subjectId)};
         final ContentResolver resolver = mContext.getContentResolver();
@@ -112,7 +112,7 @@ public class SubscribeAlarmManager {
             while (cursor != null && cursor.moveToNext()) {
                 long id = cursor.getLong(2);
                 ContentProviderOperation.Builder builder = ContentProviderOperation.newDelete(SubscribeContract.Subscribe.CONTENT_URI);
-                String selection = "_id=? AND 0=(SELECT count(*) FROM " + SubscribeDatabaseHelper.Tables.LINKED + " WHERE " + SubscribeContract.Linked.SUBSCRIBE_ID +"=?)";
+                String selection = SubscribeContract.Subscribe.EVENT_ID + "=? AND 0=(SELECT count(*) FROM " + SubscribeDatabaseHelper.Tables.LINKED + " WHERE " + SubscribeContract.Linked.SUBSCRIBE_ID +"=?)";
                 String[] selectionArgs = new String[]{String.valueOf(id), String.valueOf(id)};
                 builder.withSelection(selection, selectionArgs);
                 ops.add(builder.build());

@@ -30,7 +30,7 @@
 
     <EditText
         android:id="@+id/title"
-        android:hint="标题"
+        android:hint="事件标题"
         android:layout_width="wrap_content"
         android:layout_height="60dp" />
 
@@ -46,9 +46,27 @@
         android:layout_width="wrap_content"
         android:layout_height="60dp" />
 
+    <EditText
+        android:id="@+id/subjectId"
+        android:hint="栏目id"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp" />
+
     <Button
         android:id="@+id/btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="插入"/>
+        android:text="插入事件"/>
+
+    <EditText
+        android:id="@+id/subjectTitle"
+        android:hint="栏目标题"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp" />
+
+    <Button
+        android:id="@+id/subjectBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="插入栏目"/>
 </LinearLayout>

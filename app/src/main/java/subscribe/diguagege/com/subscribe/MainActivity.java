@@ -4,6 +4,7 @@ import android.content.ContentProviderOperation;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,19 +29,58 @@ public class MainActivity extends AppCompatActivity {
         final EditText titleEd = (EditText) findViewById(R.id.title);
         final EditText startEd = (EditText) findViewById(R.id.time);
         final EditText reminderEd = (EditText) findViewById(R.id.reminder);
+        final EditText subjectTitle = (EditText) findViewById(R.id.subjectTitle);
         Button btn = (Button) findViewById(R.id.delete);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getContentResolver().delete(SubscribeContract.Subject.CONTENT_URI, "_id=?", new String[]{et.getText().toString()});
+                getContentResolver().delete(ContentUris.withAppendedId(SubscribeContract.Subject.CONTENT_URI, Long.valueOf(et.getText().toString())), "subject_id=?", new String[]{et.getText().toString()});
             }
         });
 
-        ContentValues subjectValues = new ContentValues();
-        subjectValues.put(SubscribeContract.Subject.TITLE, "Hello1");
-        getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
+        Button subjectBtn = (Button) findViewById(R.id.subjectBtn);
+        subjectBtn.setOnClickListener(new View.OnClickListener() {
 
-        ContentValues linkedValues = new ContentValues();
+            @Override
+            public void onClick(View v) {
+                ContentValues subjectValues = new ContentValues();
+                subjectValues.put(SubscribeContract.Subject.TITLE, subjectTitle.getText().toString());
+                subjectValues.put(SubscribeContract.Subject.TYPE, 1);
+                subjectValues.put(SubscribeContract.Subject.SUBJECT_ID, et.getText().toString());
+                Uri uri = getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
+                final long subjectId = ContentUris.parseId(uri);
+                final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+                int random = (int) (1 + Math.random() * 10);
+                for (int i = 0; i < random; i++) {
+                    ops.clear();
+                    ContentValues values = new ContentValues();
+                    values.put(SubscribeContract.Subscribe.EVENT_ID, i);
+                    values.put(SubscribeContract.Subscribe.TITLE, "Hello Subject : " + subjectId + " This is Event :" + i);
+                    values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (random * DateUtils.MINUTE_IN_MILLIS));
+                    values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (random * DateUtils.MINUTE_IN_MILLIS));
+                    int eventIdIndex = ops.size();
+                    ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
+                            ContentUris.withAppendedId(SubscribeContract.Subscribe.CONTENT_URI, subjectId)).withValues(values);
+                    ops.add(b.build());
+
+                    ContentValues reminderValues = new ContentValues();
+                    reminderValues.put(SubscribeContract.Reminders.MINUTES, random - i);
+                    b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
+                    b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
+                    ops.add(b.build());
+
+                    try {
+                        getContentResolver().applyBatch(SubscribeContract.AUTHORITY, ops);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (OperationApplicationException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+//        ContentValues linkedValues = new ContentValues();
 //        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 1);
 //        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
 //        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
@@ -68,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
 
                 ContentValues reminderValues = new ContentValues();
                 reminderValues.put(SubscribeContract.Reminders.MINUTES, Integer.valueOf(reminderEd.getText().toString()));
-                getContentResolver().insert(SubscribeContract.Reminders.CONTENT_URI, reminderValues);
                 b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
                 b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
                 ops.add(b.build());

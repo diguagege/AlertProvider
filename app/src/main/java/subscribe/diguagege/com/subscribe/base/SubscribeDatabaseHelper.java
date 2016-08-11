@@ -2,9 +2,9 @@ package subscribe.diguagege.com.subscribe.base;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by hanwei on 16-7-25.
@@ -22,18 +22,18 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         public static final String LINKED = "Linked";
     }
 
-    private DatabaseUtils.InsertHelper mSubjectInserter;
-    private DatabaseUtils.InsertHelper mSubscribeInserter;
-    private DatabaseUtils.InsertHelper mReminderInserter;
-    private DatabaseUtils.InsertHelper mAlertsInserter;
-    private DatabaseUtils.InsertHelper mLinkedInserter;
+    private InsertHelper mSubjectInserter;
+    private InsertHelper mSubscribeInserter;
+    private InsertHelper mReminderInserter;
+    private InsertHelper mAlertsInserter;
+    private InsertHelper mLinkedInserter;
 
     public long insertSubject(ContentValues values) {
         return mSubjectInserter.insert(values);
     }
 
     public long insertSubscribe(ContentValues values) {
-        return mSubscribeInserter.insert(values);
+        return mSubscribeInserter.insertIgnore(values);
     }
 
     public long insertReminders(ContentValues values) {
@@ -52,6 +52,7 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(SubscribeContract.Linked.SUBJECT_ID, subjectId);
         values.put(SubscribeContract.Linked.SUBSCRIBE_ID, subscribeId);
+        Log.d("ProviderDebug", "SubjectId : " + subjectId);
         return mLinkedInserter.insert(values);
     }
 
@@ -73,11 +74,11 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onOpen(SQLiteDatabase db) {
-        mSubjectInserter = new DatabaseUtils.InsertHelper(db, Tables.SUBJECT);
-        mSubscribeInserter = new DatabaseUtils.InsertHelper(db, Tables.SUBSCRIBE);
-        mReminderInserter = new DatabaseUtils.InsertHelper(db, Tables.REMINDER);
-        mAlertsInserter = new DatabaseUtils.InsertHelper(db, Tables.ALERTS);
-        mLinkedInserter = new DatabaseUtils.InsertHelper(db, Tables.LINKED);
+        mSubjectInserter = new InsertHelper(db, Tables.SUBJECT);
+        mSubscribeInserter = new InsertHelper(db, Tables.SUBSCRIBE);
+        mReminderInserter = new InsertHelper(db, Tables.REMINDER);
+        mAlertsInserter = new InsertHelper(db, Tables.ALERTS);
+        mLinkedInserter = new InsertHelper(db, Tables.LINKED);
     }
 
     @Override
@@ -137,7 +138,7 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
     private void createSubscribesTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.SUBSCRIBE + " (" +
                 SubscribeContract.Subscribe._ID + " INTEGER PRIMARY KEY," +
-                SubscribeContract.Subscribe.EVENT_ID + " INTEGER," +
+                SubscribeContract.Subscribe.EVENT_ID + " INTEGER NOT NULL," +
                 SubscribeContract.Subscribe.TITLE + " TEXT," +
                 SubscribeContract.Subscribe.ACTION + " TEXT," +
                 SubscribeContract.Subscribe.DESCRIPTION + " TEXT," +
@@ -153,18 +154,20 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
                 SubscribeContract.Subscribe.EXTEND_DATA6 + " TEXT," +
                 SubscribeContract.Subscribe.EXTEND_DATA7 + " TEXT," +
                 SubscribeContract.Subscribe.EXTEND_DATA8 + " TEXT," +
-                SubscribeContract.Subscribe.EXTEND_DATA9 + " TEXT"
+                SubscribeContract.Subscribe.EXTEND_DATA9 + " TEXT," +
+                "UNIQUE(" + SubscribeContract.Subscribe.EVENT_ID + ")"
                 + " )");
     }
 
     private void createSubjectsTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.SUBJECT + " (" +
                 SubscribeContract.Subject._ID + " INTEGER PRIMARY KEY," +
+                SubscribeContract.Subject.SUBJECT_ID + " INTEGER NOT NULL," +
                 SubscribeContract.Subject.TITLE + " TEXT," +
                 SubscribeContract.Subject.ACTION + " TEXT," +
                 SubscribeContract.Subject.DESCRIPTION + " TEXT," +
                 SubscribeContract.Subject.ICON_URL + " TEXT," +
-                SubscribeContract.Subject.TYPE + " INTEGER"
+                SubscribeContract.Subject.TYPE + " INTEGER NOT NULL"
                 + " )");
     }
 
@@ -179,7 +182,7 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
     private void createSubscribeAlerts(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.ALERTS + " (" +
                 SubscribeContract.SubscribeAlerts._ID + " INTEGER PRIMARY KEY," +
-                SubscribeContract.SubscribeAlerts.SUBSCRIBE_ID + " INTEGER," +
+                SubscribeContract.SubscribeAlerts.SUBSCRIBE_ID + " INTEGER NOT NULL," +
                 SubscribeContract.SubscribeAlerts.BEGIN + " INTEGER," +
                 SubscribeContract.SubscribeAlerts.END + " INTEGER," +
                 SubscribeContract.SubscribeAlerts.ALARM_TIME + " INTEGER," +

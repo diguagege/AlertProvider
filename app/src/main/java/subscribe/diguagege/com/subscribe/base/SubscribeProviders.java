@@ -31,6 +31,7 @@ public class SubscribeProviders extends SQLiteContentProvider {
     protected static final int SCHEDULE_ALARM_REMOVE = 6;
     protected static final int LINKED = 7;
     protected static final int SUBSCRIBE_ID = 8;
+    protected static final int SUBJECT_ID = 9;
     private SubscribeDatabaseHelper mHelper;
     private SubscribeAlarmManager mAlarmManager;
     private Context mContext;
@@ -53,6 +54,7 @@ public class SubscribeProviders extends SQLiteContentProvider {
 
     static {
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subject", SUBJECT);
+        sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subject/*", SUBJECT_ID);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe", SUBSCRIBE);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "subscribe/*", SUBSCRIBE_ID);
         sUriMatcher.addURI(SubscribeContract.AUTHORITY, "reminders", REMINDER);
@@ -151,10 +153,13 @@ public class SubscribeProviders extends SQLiteContentProvider {
                 sendUpdateNotification(id);
                 break;
             case SUBSCRIBE_ID:
-                id = mHelper.insertSubscribe(values);
+                mHelper.insertSubscribe(values);
                 long subjectId = ContentUris.parseId(uri);
-                mHelper.insertLinked(subjectId, id);
-                sendUpdateNotification(id);
+                int subscribeId = (int) values.get(SubscribeContract.Subscribe.EVENT_ID);
+                if (subscribeId >= 0) {
+                    mHelper.insertLinked(subjectId, subscribeId);
+                    sendUpdateNotification(subscribeId);
+                }
                 break;
             case REMINDER:
                 id = mHelper.insertReminders(values);
@@ -209,7 +214,11 @@ public class SubscribeProviders extends SQLiteContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case SUBJECT:
-                int subjectId = mDb.delete(SubscribeContract.Subject.TABLE_NAME, selection, selectionArgs);
+                mDb.delete(SubscribeContract.Subject.TABLE_NAME, selection, selectionArgs);
+                break;
+            case SUBJECT_ID:
+                mDb.delete(SubscribeContract.Subject.TABLE_NAME, selection, selectionArgs);
+                long subjectId = ContentUris.parseId(uri);
                 mAlarmManager.trrigerDeleteLink(subjectId);
                 break;
             case SUBSCRIBE:
