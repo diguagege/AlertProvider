@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                     values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (random * DateUtils.MINUTE_IN_MILLIS));
                     values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (random * DateUtils.MINUTE_IN_MILLIS));
                     int eventIdIndex = ops.size();
+
                     ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
                             ContentUris.withAppendedId(SubscribeContract.Subscribe.CONTENT_URI, subjectId)).withValues(values);
                     ops.add(b.build());

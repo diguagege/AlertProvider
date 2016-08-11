@@ -153,7 +153,7 @@ public class SubscribeProviders extends SQLiteContentProvider {
                 sendUpdateNotification(id);
                 break;
             case SUBSCRIBE_ID:
-                mHelper.insertSubscribe(values);
+                id = mHelper.insertSubscribe(values);
                 long subjectId = ContentUris.parseId(uri);
                 int subscribeId = (int) values.get(SubscribeContract.Subscribe.EVENT_ID);
                 if (subscribeId >= 0) {
