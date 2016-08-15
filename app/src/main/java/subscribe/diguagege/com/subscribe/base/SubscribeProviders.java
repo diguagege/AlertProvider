@@ -193,6 +193,7 @@ public class SubscribeProviders extends SQLiteContentProvider {
                 mDb.update(SubscribeDatabaseHelper.Tables.SUBSCRIBE, values, selection, selectionArgs);
                 return 0;
             case REMINDER:
+                mDb.update(SubscribeDatabaseHelper.Tables.REMINDER, values, selection, selectionArgs);
                 mAlarmManager.scheduleNextAlarm(false);
                 return 0;
             // TODO: replace the SCHEDULE_ALARM private URIs with a

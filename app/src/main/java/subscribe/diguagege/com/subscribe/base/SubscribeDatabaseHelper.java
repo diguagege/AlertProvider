@@ -29,7 +29,7 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
     private InsertHelper mLinkedInserter;
 
     public long insertSubject(ContentValues values) {
-        return mSubjectInserter.insert(values);
+        return mSubjectInserter.insertIgnore(values);
     }
 
     public long insertSubscribe(ContentValues values) {
@@ -167,7 +167,8 @@ public class SubscribeDatabaseHelper extends SQLiteOpenHelper {
                 SubscribeContract.Subject.ACTION + " TEXT," +
                 SubscribeContract.Subject.DESCRIPTION + " TEXT," +
                 SubscribeContract.Subject.ICON_URL + " TEXT," +
-                SubscribeContract.Subject.TYPE + " INTEGER NOT NULL"
+                SubscribeContract.Subject.TYPE + " INTEGER NOT NULL,"
+                + "UNIQUE(" + SubscribeContract.Subject.SUBJECT_ID + ")"
                 + " )");
     }
 

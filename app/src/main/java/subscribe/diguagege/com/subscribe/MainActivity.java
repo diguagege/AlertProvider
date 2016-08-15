@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.Button;
@@ -19,45 +21,51 @@ import java.util.ArrayList;
 import subscribe.diguagege.com.subscribe.base.SubscribeContract;
 
 public class MainActivity extends AppCompatActivity {
-    public static TextView tv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tv = (TextView) findViewById(R.id.text1);
-        final EditText et = (EditText) findViewById(R.id.edittext);
-        final EditText titleEd = (EditText) findViewById(R.id.title);
-        final EditText startEd = (EditText) findViewById(R.id.time);
-        final EditText reminderEd = (EditText) findViewById(R.id.reminder);
-        final EditText subjectTitle = (EditText) findViewById(R.id.subjectTitle);
-        Button btn = (Button) findViewById(R.id.delete);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getContentResolver().delete(ContentUris.withAppendedId(SubscribeContract.Subject.CONTENT_URI, Long.valueOf(et.getText().toString())), "subject_id=?", new String[]{et.getText().toString()});
-            }
-        });
+        final String[] subjectArr = getResources().getStringArray(R.array.subject_array);
+        final String[] rockets = getResources().getStringArray(R.array.rocket);
+        final String[] lakers = getResources().getStringArray(R.array.lakers);
+        final String[] shelled = getResources().getStringArray(R.array.shelled);
+        final String[] rocketsTimes = getResources().getStringArray(R.array.rocket_time);
+        final String[] lakersTimes = getResources().getStringArray(R.array.lakers_time);
+        final String[] shelledTimes = getResources().getStringArray(R.array.shelled_time);
 
-        Button subjectBtn = (Button) findViewById(R.id.subjectBtn);
-        subjectBtn.setOnClickListener(new View.OnClickListener() {
+        final String[] rocketId = getResources().getStringArray(R.array.rocket_id);
+        final String[] lakersId = getResources().getStringArray(R.array.lakers_id);
+        final String[] shelledId = getResources().getStringArray(R.array.shelled_id);
 
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.dataRecyclerView);
+        recyclerView.getItemAnimator().setSupportsChangeAnimations(false);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        final DataAdapter adapter = new DataAdapter(this);
+        recyclerView.setAdapter(adapter);
+
+
+        Button btn1 = (Button) findViewById(R.id.subscribeLow1);
+        btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ContentValues subjectValues = new ContentValues();
-                subjectValues.put(SubscribeContract.Subject.TITLE, subjectTitle.getText().toString());
+                subjectValues.put(SubscribeContract.Subject.TITLE, subjectArr[0]);
                 subjectValues.put(SubscribeContract.Subject.TYPE, 1);
-                subjectValues.put(SubscribeContract.Subject.SUBJECT_ID, et.getText().toString());
+                subjectValues.put(SubscribeContract.Subject.SUBJECT_ID, 1);
                 Uri uri = getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
-                final long subjectId = ContentUris.parseId(uri);
+                if (uri == null) {
+                    return;
+                }
+                final long subjectId = 1;
                 final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-                int random = (int) (1 + Math.random() * 10);
-                for (int i = 0; i < random; i++) {
+                for (int i = 0; i < rockets.length; i++) {
                     ops.clear();
                     ContentValues values = new ContentValues();
-                    values.put(SubscribeContract.Subscribe.EVENT_ID, i);
-                    values.put(SubscribeContract.Subscribe.TITLE, "Hello Subject : " + subjectId + " This is Event :" + i);
-                    values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (random * DateUtils.MINUTE_IN_MILLIS));
-                    values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (random * DateUtils.MINUTE_IN_MILLIS));
+                    values.put(SubscribeContract.Subscribe.EVENT_ID, Integer.valueOf(rocketId[i]));
+                    values.put(SubscribeContract.Subscribe.TITLE, rockets[i]);
+                    values.put(SubscribeContract.Subscribe.DTSTART, rocketsTimes[i]);
+                    values.put(SubscribeContract.Subscribe.DTEND, rocketsTimes[i]);
                     int eventIdIndex = ops.size();
 
                     ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
@@ -65,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                     ops.add(b.build());
 
                     ContentValues reminderValues = new ContentValues();
-                    reminderValues.put(SubscribeContract.Reminders.MINUTES, random - i);
+                    reminderValues.put(SubscribeContract.Reminders.MINUTES, 10);
                     b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
                     b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
                     ops.add(b.build());
@@ -76,104 +84,138 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     } catch (OperationApplicationException e) {
                         e.printStackTrace();
+                    } finally {
+                        adapter.loadEvent();
                     }
                 }
             }
         });
 
-//        ContentValues linkedValues = new ContentValues();
-//        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 1);
-//        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
-//        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
 
-//        linkedValues.put(SubscribeContract.Linked.SUBJECT_ID, 2);
-//        linkedValues.put(SubscribeContract.Linked.SUBSCRIBE_ID, 1);
-//        getContentResolver().insert(SubscribeContract.Linked.CONTENT_URI, linkedValues);
-
-
-        final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-        Button btnAdd = (Button) findViewById(R.id.btn);
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+        Button unSubscribeBtn1 = (Button) findViewById(R.id.unSubscribeLow1);
+        unSubscribeBtn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ops.clear();
-                ContentValues values = new ContentValues();
-                values.put(SubscribeContract.Subscribe.EVENT_ID, 1);
-                values.put(SubscribeContract.Subscribe.TITLE, titleEd.getText().toString());
-                values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
-                values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (Integer.valueOf(startEd.getText().toString()) * DateUtils.MINUTE_IN_MILLIS));
-                int eventIdIndex = ops.size();
-                ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
-                        ContentUris.withAppendedId(SubscribeContract.Subscribe.CONTENT_URI, 1)).withValues(values);
-                ops.add(b.build());
+                getContentResolver().delete(ContentUris.withAppendedId(SubscribeContract.Subject.CONTENT_URI, 1)
+                        , "subject_id=?", new String[]{"1"});
 
-                ContentValues reminderValues = new ContentValues();
-                reminderValues.put(SubscribeContract.Reminders.MINUTES, Integer.valueOf(reminderEd.getText().toString()));
-                b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
-                b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
-                ops.add(b.build());
-
-                try {
-                    getContentResolver().applyBatch(SubscribeContract.AUTHORITY, ops);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                } catch (OperationApplicationException e) {
-                    e.printStackTrace();
-                }
+                adapter.loadEvent();
             }
         });
 
 
-//        for (int i = 0; i < 2; i++) {
-//            ContentValues values = new ContentValues();
-//            values.put(SubscribeContract.Subscribe.TITLE, "Hello World " + i);
-//            values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (i*DateUtils.MINUTE_IN_MILLIS));
-//            values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (i*DateUtils.MINUTE_IN_MILLIS));
-//            int eventIdIndex = ops.size();
-//            ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
-//                    SubscribeContract.Subscribe.CONTENT_URI).withValues(values);
-//            ops.add(b.build());
-//            ContentValues reminderValues = new ContentValues();
-//            reminderValues.put(SubscribeContract.Reminders.MINUTES, 1);
-//            b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
-//            b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
-//            ops.add(b.build());
-//        }
-//        try {
-//            getContentResolver().applyBatch(SubscribeContract.AUTHORITY, ops);
-//        } catch (RemoteException e) {
-//            e.printStackTrace();
-//        } catch (OperationApplicationException e) {
-//            e.printStackTrace();
-//        }
+        Button btn2 = (Button) findViewById(R.id.subscribeLow2);
+        btn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ContentValues subjectValues = new ContentValues();
+                subjectValues.put(SubscribeContract.Subject.TITLE, subjectArr[1]);
+                subjectValues.put(SubscribeContract.Subject.TYPE, 2);
+                subjectValues.put(SubscribeContract.Subject.SUBJECT_ID, 2);
+                Uri uri = getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
+                if (uri == null) {
+                    return;
+                }
+                final long subjectId = 2;
+                final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+                for (int i = 0; i < lakers.length; i++) {
+                    ops.clear();
+                    ContentValues values = new ContentValues();
+                    values.put(SubscribeContract.Subscribe.EVENT_ID, Integer.valueOf(lakersId[i]));
+                    values.put(SubscribeContract.Subscribe.TITLE, lakers[i]);
+                    values.put(SubscribeContract.Subscribe.DTSTART, lakersTimes[i]);
+                    values.put(SubscribeContract.Subscribe.DTEND, lakersTimes[i]);
+                    int eventIdIndex = ops.size();
+
+                    ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
+                            ContentUris.withAppendedId(SubscribeContract.Subscribe.CONTENT_URI, subjectId)).withValues(values);
+                    ops.add(b.build());
+
+                    ContentValues reminderValues = new ContentValues();
+                    reminderValues.put(SubscribeContract.Reminders.MINUTES, 10);
+                    b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
+                    b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
+                    ops.add(b.build());
+
+                    try {
+                        getContentResolver().applyBatch(SubscribeContract.AUTHORITY, ops);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (OperationApplicationException e) {
+                        e.printStackTrace();
+                    } finally {
+                        adapter.loadEvent();
+                    }
+
+                }
+            }
+        });
+
+        Button unSubscribeBtn2 = (Button) findViewById(R.id.unSubscribeLow2);
+        unSubscribeBtn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getContentResolver().delete(ContentUris.withAppendedId(SubscribeContract.Subject.CONTENT_URI, 2)
+                        , "subject_id=?", new String[]{"2"});
+                adapter.loadEvent();
+            }
+        });
 
 
+        Button btn3 = (Button) findViewById(R.id.subscribeLow3);
+        btn3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ContentValues subjectValues = new ContentValues();
+                subjectValues.put(SubscribeContract.Subject.TITLE, subjectArr[2]);
+                subjectValues.put(SubscribeContract.Subject.TYPE, 3);
+                subjectValues.put(SubscribeContract.Subject.SUBJECT_ID, 3);
+                Uri uri = getContentResolver().insert(SubscribeContract.Subject.CONTENT_URI, subjectValues);
+                if (uri == null) {
+                    return;
+                }
+                final long subjectId = 3;
+                final ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+                for (int i = 0; i < shelled.length; i++) {
+                    ops.clear();
+                    ContentValues values = new ContentValues();
+                    values.put(SubscribeContract.Subscribe.EVENT_ID, Integer.valueOf(shelledId[i]));
+                    values.put(SubscribeContract.Subscribe.TITLE, shelled[i]);
+                    values.put(SubscribeContract.Subscribe.DTSTART, shelledTimes[i]);
+                    values.put(SubscribeContract.Subscribe.DTEND, shelledTimes[i]);
+                    int eventIdIndex = ops.size();
 
-//        for (int i = 0; i < 8; i++) {
-//            ContentValues values = new ContentValues();
-//            values.put(SubscribeContract.Subscribe.TITLE, "Hello World " + i);
-//            values.put(SubscribeContract.Subscribe.DTSTART, System.currentTimeMillis() + (i * DateUtils.MINUTE_IN_MILLIS));
-//            values.put(SubscribeContract.Subscribe.DTEND, System.currentTimeMillis() + (i * DateUtils.MINUTE_IN_MILLIS));
-//            getContentResolver().insert(SubscribeContract.Subscribe.CONTENT_URI, values);
-//            ContentValues reminderValues = new ContentValues();
-//            reminderValues.put(SubscribeContract.Reminders.MINUTES, 1);
-//            reminderValues.put(SubscribeContract.Reminders.SUBSCRIBE_ID, i + 1);
-//            getContentResolver().insert(SubscribeContract.Reminders.CONTENT_URI, reminderValues);
-//        }
+                    ContentProviderOperation.Builder b = ContentProviderOperation.newInsert(
+                            ContentUris.withAppendedId(SubscribeContract.Subscribe.CONTENT_URI, subjectId)).withValues(values);
+                    ops.add(b.build());
 
+                    ContentValues reminderValues = new ContentValues();
+                    reminderValues.put(SubscribeContract.Reminders.MINUTES, 10);
+                    b = ContentProviderOperation.newInsert(SubscribeContract.Reminders.CONTENT_URI).withValues(reminderValues);
+                    b.withValueBackReference(SubscribeContract.Reminders.SUBSCRIBE_ID, eventIdIndex);
+                    ops.add(b.build());
 
-//        Cursor c = getContentResolver().query(SubscribeContract.Subscribe.CONTENT_URI, null, null, null, null);
-//        if (c != null) {
-//            Log.d("ProviderDebug", "Count : " + c.getCount());
-//        }
+                    try {
+                        getContentResolver().applyBatch(SubscribeContract.AUTHORITY, ops);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (OperationApplicationException e) {
+                        e.printStackTrace();
+                    } finally {
+                        adapter.loadEvent();
+                    }
+                }
+            }
+        });
 
-//        ContentValues v = new ContentValues();
-//        v.put(SubscribeContract.SubscribeAlerts.SUBSCRIBE_ID, 1);
-//        getContentResolver().insert(SubscribeContract.SubscribeAlerts.CONTENT_URI, v);
-//
-//        Cursor c1 = getContentResolver().query(SubscribeContract.SubscribeAlerts.CONTENT_URI, null, null, null, null);
-//        if (c1 != null) {
-//            Log.d("ProviderDebug", "Count alerts : " + c1.getCount());
-//        }
+        Button unSubscribeBtn3 = (Button) findViewById(R.id.unSubscribeLow3);
+        unSubscribeBtn3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getContentResolver().delete(ContentUris.withAppendedId(SubscribeContract.Subject.CONTENT_URI, 3)
+                        , "subject_id=?", new String[]{"3"});
+                adapter.loadEvent();
+            }
+        });
     }
 }

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="subject_array">
+        <item>火箭队比赛</item>
+        <item>湖人队比赛</item>
+        <item>神盾局特工</item>
+    </string-array>
+
+    <string-array name="rocket">
+        <item>火箭打湖人</item>
+        <item>火箭打马刺</item>
+        <item>火箭打热火</item>
+        <item>火箭打公牛</item>
+    </string-array>
+
+    <string-array name="rocket_id">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="rocket_time">
+        <item>1468550078000</item><!--2016/7/15 10:34:38-->
+        <item>1468848000000</item><!--2016/7/18 21:20:00-->
+        <item>1469409600000</item><!--2016/7/25 9:20:00-->
+        <item>1469434800000</item><!--2016/7/25 16:20:00-->
+    </string-array>
+    
+    <string-array name="lakers">
+        <item>湖人打火箭</item>
+        <item>湖人打马刺</item>
+        <item>湖人打热火</item>
+        <item>湖人打公牛</item>
+    </string-array>
+
+    <string-array name="lakers_id">
+        <item>1</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <string-array name="lakers_time">
+        <item>1469414400000</item><!--2016/7/25 10:40:00-->
+        <item>1470105600000</item><!--2016/8/2 10:40:00-->
+        <item>1470990600000</item><!--2016/8/12 16:30:00-->
+        <item>1471336200000</item><!--2016/8/16 16:30:00-->
+    </string-array>
+    
+    <string-array name="shelled">
+        <item>神盾局特工1</item>
+        <item>神盾局特工2</item>
+        <item>神盾局特工3</item>
+        <item>神盾局特工4</item>
+        <item>神盾局特工5</item>
+        <item>神盾局特工6</item>
+        <item>神盾局特工7</item>
+        <item>神盾局特工8</item>
+        <item>神盾局特工9</item>
+        <item>神盾局特工10</item>
+    </string-array>
+
+    <string-array name="shelled_id">
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+    </string-array>
+
+    <string-array name="shelled_time">
+        <item>1471227000000</item><!--2016/8/15 10:10:00-->
+        <item>1471230600000</item>
+        <item>1471234200000</item>
+        <item>1471237800000</item>
+        <item>1471241400000</item>
+        <item>1471245000000</item>
+        <item>1471248600000</item>
+        <item>1471252200000</item>
+        <item>1471255800000</item>
+        <item>1471255800000</item>
+    </string-array>
+</resources>

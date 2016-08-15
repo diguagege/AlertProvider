@@ -9,64 +9,95 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     tools:context="subscribe.diguagege.com.subscribe.MainActivity">
+    <LinearLayout
+        android:id="@+id/low1"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="68dip">
+        <TextView
+            android:text="火箭队比赛"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
 
-    <TextView
-        android:id="@+id/text1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        <Button
+            android:id="@+id/subscribeLow1"
+            android:text="订阅"
+            android:gravity="center"
+            android:layout_marginLeft="80dp"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content" />
 
-    <EditText
-        android:id="@+id/edittext"
-        android:hint="删除ID"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/unSubscribeLow1"
+            android:text="取消订阅"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_marginLeft="12dp"
+            android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="按钮"/>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/low2"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="68dip">
+        <TextView
+            android:text="湖人队比赛"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
 
-    <EditText
-        android:id="@+id/title"
-        android:hint="事件标题"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/subscribeLow2"
+            android:text="订阅"
+            android:gravity="center"
+            android:layout_marginLeft="80dp"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content" />
 
-    <EditText
-        android:id="@+id/time"
-        android:hint="开始时间(当前+输入的分钟）"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/unSubscribeLow2"
+            android:text="取消订阅"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_marginLeft="12dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/low3"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="68dip">
+        <TextView
+            android:text="神盾局特工"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
 
-    <EditText
-        android:id="@+id/reminder"
-        android:hint="提前N分钟"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/subscribeLow3"
+            android:text="订阅"
+            android:gravity="center"
+            android:layout_marginLeft="80dp"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content" />
 
-    <EditText
-        android:id="@+id/subjectId"
-        android:hint="栏目id"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
-
-    <Button
-        android:id="@+id/btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="插入事件"/>
-
-    <EditText
-        android:id="@+id/subjectTitle"
-        android:hint="栏目标题"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
-
-    <Button
-        android:id="@+id/subjectBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="插入栏目"/>
+        <Button
+            android:id="@+id/unSubscribeLow3"
+            android:text="取消订阅"
+            android:gravity="center"
+            android:layout_width="80dp"
+            android:layout_marginLeft="12dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/dataRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
 </LinearLayout>
