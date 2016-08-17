@@ -3,101 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
+    android:weightSum="1"
     tools:context="subscribe.diguagege.com.subscribe.MainActivity">
-    <LinearLayout
-        android:id="@+id/low1"
-        android:orientation="horizontal"
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/subjectRecyclerView"
+        android:layout_weight="0.5"
         android:layout_width="match_parent"
-        android:layout_height="68dip">
-        <TextView
-            android:text="火箭队比赛"
-            android:gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
+        android:layout_height="0dp" />
 
-        <Button
-            android:id="@+id/subscribeLow1"
-            android:text="订阅"
-            android:gravity="center"
-            android:layout_marginLeft="80dp"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/unSubscribeLow1"
-            android:text="取消订阅"
-            android:gravity="center"
-            android:layout_width="80dp"
-            android:layout_marginLeft="12dp"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/low2"
-        android:orientation="horizontal"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/eventRecyclerView"
+        android:layout_weight="0.5"
         android:layout_width="match_parent"
-        android:layout_height="68dip">
-        <TextView
-            android:text="湖人队比赛"
-            android:gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
-
-        <Button
-            android:id="@+id/subscribeLow2"
-            android:text="订阅"
-            android:gravity="center"
-            android:layout_marginLeft="80dp"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/unSubscribeLow2"
-            android:text="取消订阅"
-            android:gravity="center"
-            android:layout_width="80dp"
-            android:layout_marginLeft="12dp"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/low3"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="68dip">
-        <TextView
-            android:text="神盾局特工"
-            android:gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
-
-        <Button
-            android:id="@+id/subscribeLow3"
-            android:text="订阅"
-            android:gravity="center"
-            android:layout_marginLeft="80dp"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/unSubscribeLow3"
-            android:text="取消订阅"
-            android:gravity="center"
-            android:layout_width="80dp"
-            android:layout_marginLeft="12dp"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/dataRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </LinearLayout>
+        android:layout_height="0dp" />
 </LinearLayout>

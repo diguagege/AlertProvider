@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/subjectTitle"
+        android:text="神盾局特工第一集"
+        android:layout_marginLeft="10dp"
+        android:gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="68dip" />
+
+    <Button
+        android:id="@+id/subscribe"
+        android:text="订阅"
+        android:gravity="center"
+        android:layout_marginLeft="70dp"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/unSubscribe"
+        android:text="取消订阅"
+        android:gravity="center"
+        android:layout_width="80dp"
+        android:layout_marginLeft="12dp"
+        android:layout_height="wrap_content" />
+</LinearLayout>

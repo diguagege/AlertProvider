@@ -24,6 +24,8 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     public ArrayList<Event> mEvents = new ArrayList<Event>();
     private Handler mHandler = new Handler();
 
+    public static final String SORT_BY_TIME = SubscribeContract.Subscribe.DTSTART + " ASC";
+
     public DataAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
         mContext = context;
@@ -65,7 +67,7 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
     public void loadEvent() {
         Cursor c = mContext.getContentResolver().query(SubscribeContract.Subscribe.CONTENT_URI
-                , null, null, null, null);
+                , null, null, null, SORT_BY_TIME);
         ArrayList<Event> events = new ArrayList<Event>();
         try {
             while (c != null && c.moveToNext()) {
@@ -91,6 +93,33 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 class Event {
     public String time;
     public String title;
+    public long eventId;
+    public long startTime;
+    public long endTime;
+
+    public long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(long eventId) {
+        this.eventId = eventId;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
 
     public String getTime() {
         return time;
