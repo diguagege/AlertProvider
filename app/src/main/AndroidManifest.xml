@@ -31,7 +31,11 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".base.SubscribeReceiver"/>
+        <receiver android:name=".base.SubscribeReceiver">
+            <intent-filter>
+                <action android:name="com.android.calendar.subscribeTest" />
+            </intent-filter>
+        </receiver>
 
         <receiver android:name=".TestReceiver">
             <intent-filter>

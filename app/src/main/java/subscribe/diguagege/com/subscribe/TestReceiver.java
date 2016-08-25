@@ -1,6 +1,8 @@
 package subscribe.diguagege.com.subscribe;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -30,15 +32,22 @@ public class TestReceiver extends BroadcastReceiver {
         try {
             if (uri != null) {
                 alertCursor = context.getContentResolver().query(SubscribeContract.SubscribeAlerts.CONTENT_URI
-                        , null, "alarmTime=?", new String[]{uri.getLastPathSegment()}, null);
-                if (alertCursor != null && alertCursor.moveToFirst()) {
+                        , null, "alarmTime=? AND " + SubscribeContract.SubscribeAlerts.STATE + "<>1", new String[]{uri.getLastPathSegment()}, null);
+                while (alertCursor != null && alertCursor.moveToNext()) {
                     long subscribeId = alertCursor.getLong(1);
+                    long alertId = alertCursor.getLong(0);
+                    final Uri alertUri = ContentUris
+                            .withAppendedId(SubscribeContract.SubscribeAlerts.CONTENT_URI, alertId);
                     subscribeCursor = context.getContentResolver()
                             .query(SubscribeContract.Subscribe.CONTENT_URI, null, "_id=?", new String[]{String.valueOf(subscribeId)}, null, null);
                     if (subscribeCursor != null && subscribeCursor.moveToFirst()) {
                         String title = subscribeCursor.getString(2);
                         Toast.makeText(context, title + "的提醒时间到", Toast.LENGTH_LONG).show();
                     }
+                    ContentValues values = new ContentValues();
+                    values.put(SubscribeContract.SubscribeAlerts.RECEIVED_TIME, System.currentTimeMillis());
+                    values.put(SubscribeContract.SubscribeAlerts.STATE, 1);
+                    context.getContentResolver().update(alertUri, values, null, null);
                 }
             }
         } finally {

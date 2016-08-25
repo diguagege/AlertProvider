@@ -1,8 +1,10 @@
 package subscribe.diguagege.com.subscribe;
 
+import android.app.PendingIntent;
 import android.content.ContentProviderOperation;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.net.Uri;
 import android.os.Handler;
@@ -27,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sendBroadcast(new Intent("com.android.calendar.subscribeTest"));
         FileUtils.readSubjectLine();
         FileUtils.readSubscribeLine();
 

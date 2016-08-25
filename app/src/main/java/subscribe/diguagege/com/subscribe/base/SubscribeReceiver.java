@@ -37,7 +37,7 @@ public class SubscribeReceiver extends BroadcastReceiver {
                 if (action.equals(SCHEDULE)) {
                     cr.update(SubscribeAlarmManager.SCHEDULE_ALARM_URI, null /* values */,
                             null /* where */, null /* selectionArgs */);
-                } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                } else/* if (action.equals(Intent.ACTION_BOOT_COMPLETED))*/ {
                     removeScheduledAlarms(cr);
                 }
                 result.finish();
